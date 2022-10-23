@@ -1,0 +1,73 @@
+#https://docs.nginx.com/nginx-ingress-controller/installation/installation-with-manifests/
+#https://kubernetes.github.io/ingress-nginx/user-guide/basic-usage/
+
+git clone https://github.com/nginxinc/kubernetes-ingress.git #--branch v2.4.0
+
+cd kubernetes-ingress/deployments
+
+kubectl apply -f common/ns-and-sa.yaml
+kubectl apply -f rbac/rbac.yaml
+
+kubectl apply -f common/default-server-secret.yaml
+kubectl apply -f common/nginx-config.yaml
+
+#edit file to uncomment annotations
+kubectl apply -f common/ingress-class.yaml
+
+kubectl apply -f common/crds/k8s.nginx.org_virtualservers.yaml
+kubectl apply -f common/crds/k8s.nginx.org_virtualserverroutes.yaml
+kubectl apply -f common/crds/k8s.nginx.org_transportservers.yaml
+kubectl apply -f common/crds/k8s.nginx.org_policies.yaml
+
+kubectl apply -f common/crds/k8s.nginx.org_globalconfigurations.yaml
+
+#kubectl apply -f deployment/nginx-ingress.yaml
+
+kubectl apply -f daemon-set/nginx-ingress.yaml
+
+kubectl create -f service/nodeport.yaml
+
+kubectl get all --namespace=nginx-ingress
+
+
+################################################
+
+kubectl create namespace project
+kubectl get ns project
+
+kubectl create deployment nginx-deploy --image=nginx --port=80 --replicas=3 -n project
+kubectl get all -n project
+
+kubectl expose deployment nginx-deploy --name=nginx-svc --port=80 --target-port=80 --selector=app=nginx-deploy -n project
+kubectl get all -n project
+
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nginx
+  namespace: project
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+spec:
+  rules:
+  - host: test.notexist.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nginx-svc
+            port:
+              number: 80
+
+
+#################
+kubectl delete namespace nginx-ingress
+kubectl delete clusterrole nginx-ingress
+kubectl delete clusterrolebinding nginx-ingress
+cd kubernetes-ingress/deployments
+kubectl delete -f common/crds/
+cd ~/
+rm -rf ~/kubernetes-ingress
