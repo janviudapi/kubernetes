@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>GUID Generator</title>
+    <link rel="stylesheet" href="https://unpkg.com/98.css">
+    <style>
+        /* Center the .window on the screen */
+        .window {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .window-body {
+            text-align: center; /* Center align the text and buttons */
+        }
+
+        /* Optional: Add some margin between the paragraph and the buttons */
+        #guid-display {
+            margin-bottom: 20px;
+        }
+
+        /* Style the image as a button */
+        .copy-icon {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            vertical-align: middle;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="window" style="width: 480px;">
+        <div class="title-bar">
+            <div class="title-bar-text">Click to generate a GUID</div>
+            <div class="title-bar-controls">
+                <button aria-label="Minimize"></button>
+                <button aria-label="Maximize"></button>
+                <button aria-label="Close"></button>
+            </div>
+        </div>
+        <div class="window-body">
+            <p id="guid-container">
+                <strong><span id="guid-display">GUID</span></strong>
+
+                <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAvElEQVR4nO2XQQ7DMAzD+P9Pcy8osKExkrUk0HNSQbIciIiIWIHD3/GYAOQAiwDLMvt3M8HFF0wAcgBFgOtIHTcTHJ4B0+cdd6EEIAdw1NvBzRFIAHIAr4rAryQAOYAiQDOAhiC1ANUgA9geQIuQbYK0CttbgB5D7niN3Wyp8QNMAHKARYBmgA1BagEnauhmS40fYC1ALeBB3/YImADkAN8UgcdjApADLAI8r96+ZfePJwA5gFfWb0REMMQH4Vh8roHaHsAAAAAASUVORK5CYII=" alt="Copy" class="copy-icon" id="copy-guid"/>                
+                <!-- <img src="images/copy.png" alt="Copy" class="copy-icon" id="copy-guid"> -->
+            </p>
+            <button class="button" id="generate-guid">Generate New GUID</button>
+            <p id="display-message" style="color: darkgreen;"></p>
+        </div>
+    </div>
+
+    <script>
+        var element = document.getElementById('guid-display');
+        element.style.fontSize = '15px';
+        element.style.letterSpacing = "2px";
+
+        function generateGUID() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+
+        function updateGuidDisplay() {
+            var guid = generateGUID();
+            document.getElementById('guid-display').textContent = guid;
+        }
+
+        window.onload = function() {
+            updateGuidDisplay();
+        };
+
+        document.getElementById('generate-guid').addEventListener('click', function() {
+            updateGuidDisplay();
+            document.getElementById('display-message').textContent = '';
+        });        
+
+        function copyToClipboard(text) {
+            var tempInput = document.createElement('input');
+            tempInput.value = text;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+        }
+
+        document.getElementById('copy-guid').addEventListener('click', function() {
+            var guidText = document.getElementById('guid-display').textContent;
+            copyToClipboard(guidText);
+            // alert('GUID copied to clipboard!');
+            document.getElementById('display-message').textContent = 'GUID copied to clipboard!';
+        });
+    </script>
+</body>
+</html>
